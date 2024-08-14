@@ -1,6 +1,9 @@
-<!-- This example will demonstare converting a URL to OneLink URL using Facebook click id -->
-<!-- Calling URL: https://appsflyersdk.github.io/af-onelink-smart-script/examples/facebook_clickid.html?inmedia=email&fbclid=7hjy89 -->
-<!-- Expected OneLink URL: https://engmntqa.onelink.me/LtRd/?af_js_web=true&af_ss_ver=2_2_0&pid=email&af_sub2=7hjy89&fbclid=7hjy89 -->
+<!-- This example will demonstare converting a URL to OneLink URL while the deep_link_value is in the local storage -->
+<!-- Calling URL: https://appsflyersdk.github.io/af-onelink-smart-script/examples/key_from_local_storage.html?incmp11=gogo11&inmedia22=email22 -->
+<!-- Expected OneLink URL:  https://engmntqa.onelink.me/LtRd/?af_js_web=true&af_ss_ver=2_7_3&pid=email22&c=gogo11&deep_link_value=productIdFromLocalStorage -->
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,6 +27,11 @@
 
     gtag('config', 'G-RJJXZ6Q5BJ');
   </script>
+  <script>
+      // Store a value in localStorage when the page is fully loaded
+      localStorage.removeItem('deepLinkValueKeyLocalStorage');
+      localStorage.setItem('deepLinkValueKeyLocalStorage', 'productIdFromLocalStorage');
+  </script>
 </head>
 <body>
   <div class="row">
@@ -38,7 +46,7 @@
     OneLink Smart Script V2
   </h1>
   <h2 class="secondary-heading">
-    Meta Click ID Demo
+    Key from Local Storage Demo
   </h2>
   <div class="url-container">
     <div class="input_url-container">
@@ -54,30 +62,41 @@
       <pre>
       <textarea id="input_code_for_run" class="prism-live line-numbers language-js fill" spellcheck="false">
 
-        //Initializing Smart Script arguments
-        var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
-        // If a media source key is NOT FOUND on the link and NO default value is found, the script will return a null string 
-        var mediaSource = {keys: ["inmedia"], defaultValue: "my_media_default_source"};
-        // Facebook clickid passthrough to af_sub2 outgoing parameter
-        var afSub2 = {keys: ["fbclid"]};
-  
-        //Function is embedded on the window object in a global parameter called window.AF_SMART_SCRIPT.
-        //Onelink URL is generated
-        var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
-          oneLinkURL,
-          afParameters:{
-            mediaSource: mediaSource,
-            afSub2: afSub2
-          }
-        })  
-        
-        var result_url = "No output from script"
-        if (result) {
-              result_url = result.clickURL;            
-              document.getElementById('andrd_link').setAttribute('href', result_url);
-              document.getElementById('ios_link').setAttribute('href', result_url);
-        }      
-        document.getElementById('output_url').innerHTML = result_url;
+      // Assuming you have already stored a value with the key 'myKey'
+      var productIdFromLocalStorage = localStorage.getItem('deepLinkValueKeyLocalStorage');
+      
+      // For logging purposes
+      if (productIdFromLocalStorage !== null) {
+        console.log('The value of deepLinkValueKeyLocalStorage is:', productIdFromLocalStorage);
+      } else {
+        console.log('There is no value stored with the key "deepLinkValueKeyLocalStorage".');
+      }
+      
+      //Initializing Smart Script arguments
+      var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
+      // If non of the media source keys are NOT FOUND on the link and NO default value is found, the script will return a null string 
+      var mediaSource = {keys: ["inmedia22"], defaultValue: "my_media_default_source"};
+      var campaign = {keys: ["incmp11"]};
+      var deepLinkValue = {keys: [], defaultValue: productIdFromLocalStorage};
+
+      //Function is embedded on the window object in a global parameter called window.AF_SMART_SCRIPT.
+      //Onelink URL is generated
+      var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
+        oneLinkURL,
+        afParameters:{
+          mediaSource: mediaSource,
+          campaign: campaign,
+          deepLinkValue: deepLinkValue
+        }
+      })
+      
+      var result_url = "No output from script"
+      if (result) {
+            result_url = result.clickURL;            
+            document.getElementById('andrd_link').setAttribute('href', result_url);
+            document.getElementById('ios_link').setAttribute('href', result_url);
+      }      
+      document.getElementById('output_url').innerHTML = result_url;
       
       </textarea>
   </pre>
@@ -118,7 +137,7 @@
         headID.appendChild(newScript);
         // Send Google Analytics - Run Script Successful
         gtag('event', 'RunScript', {
-              'event_category' : 'SmartScriptfbclid',
+              'event_category' : 'SmartScriptMultipleKeys',
               'event_label' : 'Success'
             });
     };
